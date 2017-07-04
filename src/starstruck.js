@@ -13,6 +13,35 @@ var eurecaClientSetup = function() {
 		create();
 		ready = true;
 	});
+
+    eurecaClient.exports.setId = function(id)
+    {
+        //create() is moved here to make sure nothing is created before uniq id assignation
+        myId = id;
+        create();
+        eurecaServer.handshake();
+        ready = true;
+    }
+
+    eurecaClient.exports.remove = function(id)
+    {
+        if (playersList[id]) {
+            playersList[id].kill();
+            console.log('killing ', id, playersList[id]);
+        }
+
+    }
+
+    eurecaClient.exports.spawn = function(id, x, y)
+    {
+
+        if (id == myId)
+            return; //this is me
+
+        console.log('SPAWN');
+        var new_player = game.add.sprite(32, 32, 'dude');
+        playersList[id] = new_player;
+    }
 }
 
 
@@ -34,13 +63,13 @@ var myId;
 var map;
 var tileset;
 var layer;
-var dude
 var player;
-var facing = 'left';
+var facing = 'right';
 var jumpTimer = 0;
 var cursors;
 var jumpButton;
 var bg;
+var playersList
 
 function create() {
 
