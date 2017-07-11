@@ -7,9 +7,6 @@ var eurecaClientSetup = function () {
 
     eurecaClient.ready(function (proxy) {
         eurecaServer = proxy;
-
-
-        //we temporary put create function here so we make sure to launch the game once the client is ready
         ready = true;
     });
 
@@ -35,17 +32,13 @@ var eurecaClientSetup = function () {
         if (id == myId)
             return; //this is me
 
-        console.log('SPAWN');
-        var new_player = game.add.sprite(32, 32, 'dude');
+        console.log('SPAWN, id=', id);
+        var new_player = Player(id)
         playersList[id] = new_player;
-    }
-    eurecaClient.exports.log = function(message)
-    {
-        console.log('ClientLog: ' + message);
     }
 };
 
-Player = function () {
+Player = function (id) {
     this.lastState = {
         left: false,
         right: false,
@@ -65,7 +58,7 @@ Player = function () {
     // start position of player on canvas
     var x = 32;
     var y = 32;
-
+    this.id = id
     this.game = game;
 
     // create dude sprite
@@ -91,7 +84,7 @@ Player.prototype.update = function () {
     if (this.input.left) {
         this.dude.body.velocity.x = -150;
 
-        if (!this.input.left) {
+        if (!this.lastState.left) {
             this.dude.animations.play('left');
             this.lastState.left = true
         }
@@ -187,18 +180,7 @@ function create() {
     layer.resizeWorld();
 
     game.physics.arcade.gravity.y = 250;
-
-    // player = game.add.sprite(32, 32, 'dude')
-    //
-    // game.physics.enable(player, Phaser.Physics.ARCADE);
-    // player.body.bounce.y = 0.2;
-    // player.body.collideWorldBounds = true;
-    // player.body.setSize(20, 32, 5, 16);
-    // player.animations.add('left', [0, 1, 2, 3], 10, true);
-    // player.animations.add('turn', [4], 20, true);
-    // player.animations.add('right', [5, 6, 7, 8], 10, true);
-
-     player = new Player()
+    player = new Player(myId)
 
     game.camera.follow(player.dude);
 
@@ -217,54 +199,7 @@ function update() {
     player.input.idle = !(cursors.left.isDown || cursors.right.isDown);
 
     player.update()
-    // game.physics.arcade.collide(player, layer);
-    //
-    // player.body.velocity.x = 0;
-    //
-    // if (cursors.left.isDown)
-    // {
-    //     player.body.velocity.x = -150;
-    //
-    //     if (facing != 'left')
-    //     {
-    //         player.animations.play('left');
-    //         facing = 'left';
-    //     }
-    // }
-    // else if (cursors.right.isDown)
-    // {
-    //     player.body.velocity.x = 150;
-    //
-    //     if (facing != 'right')
-    //     {
-    //         player.animations.play('right');
-    //         facing = 'right';
-    //     }
-    // }
-    // else
-    // {
-    //     if (facing != 'idle')
-    //     {
-    //         player.animations.stop();
-    //
-    //         if (facing == 'left')
-    //         {
-    //             player.frame = 0;
-    //         }
-    //         else
-    //         {
-    //             player.frame = 5;
-    //         }
-    //
-    //         facing = 'idle';
-    //     }
-    // }
-    //
-    // if (jumpButton.isDown && player.body.onFloor() && game.time.now > jumpTimer)
-    // {
-    //     player.body.velocity.y = -250;
-    //     jumpTimer = game.time.now + 750;
-    // }
+
 
 }
 
