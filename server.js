@@ -13,7 +13,7 @@ var Eureca = require('eureca.io');
 clients = {}
  
 //create an instance of EurecaServer
-var eurecaServer = new Eureca.Server({allow:['setId', 'spawn', 'remove']});
+var eurecaServer = new Eureca.Server({allow:['setId', 'spawn', 'remove', 'updateState']});
  
 //attach eureca.io to our http server
 eurecaServer.attach(server);
@@ -46,7 +46,6 @@ eurecaServer.onDisconnect(function (conn) {
         //here we call kill() method defined in the client side
         remote.remove(conn.id);
     }
-
 });
 
 eurecaServer.exports.handshake = function()
@@ -57,10 +56,29 @@ eurecaServer.exports.handshake = function()
         var remote = clients[c].remote;
         for (var cc in clients)
         {
-            remote.spawn(clients[cc].id, 0, 0);
+            //send latest known position
+            // if it eas known lasstate - send it, else - send start point
+            var x = clients[cc].laststate ? clients[cc].laststate.x:  32;
+            var y = clients[cc].laststate ? clients[cc].laststate.y:  32;
+
+            remote.spawn(clients[cc].id, x, y);
         }
     }
 }
 
- 
+eurecaServer.exports.handleKeys = function (keys) {
+    var conn = this.connection;
+    var updatedClient = clients[conn.id];
+    //console.log("handleKeys, updatedClient = %s", updatedClient.id)
+
+    for (var c in clients)
+    {
+        var remote = clients[c].remote;
+        remote.updateState(updatedClient.id, keys);
+
+        //keep last known state so we can send it to new connected clients
+        clients[c].laststate = keys;
+    }
+}
+
 server.listen(8000);
