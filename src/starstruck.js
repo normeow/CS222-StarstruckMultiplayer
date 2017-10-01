@@ -21,6 +21,7 @@ var eurecaClientSetup = function () {
     eurecaClient.exports.remove = function (id) {
         if (playersList[id]) {
             playersList[id].kill();
+            delete playersList[id]
             console.log('remove ', id, playersList[id]);
         }
 
@@ -73,6 +74,7 @@ Player = function (x, y) {
 
     // create dude sprite
     this.dude = this.game.add.sprite(x, y, 'dude');
+    this.jumpTimer = 0;
 
     // set physics
     this.game.physics.enable(this.dude, Phaser.Physics.ARCADE);
@@ -92,8 +94,12 @@ Player.prototype.isInputChanged = function(){
         this.input.left != this.lastState.left ||
         this.input.right != this.lastState.right ||
         this.input.idle != this.lastState.idle
-        //this.input.jump != this.lastState.jump
     );
+}
+
+Player.prototype.kill = function(){
+
+    this.dude.kill()
 }
 
 Player.prototype.update = function () {
@@ -140,9 +146,13 @@ Player.prototype.update = function () {
         }
     }
 
-    if (this.input.jump && this.dude.body.onFloor() && this.game.time.now > jumpTimer) {
+    if (this.input.jump && this.dude.body.onFloor() /*&& this.game.time.now > this.jumpTimer*/) {
         this.dude.body.velocity.y = -250;
-        jumpTimer = this.game.time.now + 750;
+        //this.jumpTimer = this.game.time.now + 750;
+        this.lastState.jump = true
+    }
+    else{
+         this.lastState.jump = false
     }
 }
 
@@ -168,11 +178,8 @@ function preload() {
 
 var myId;
 var map;
-var tileset;
 var layer;
 var player;
-var facing = 'right';
-var jumpTimer = 0;
 var cursors;
 var jumpButton;
 var bg;
@@ -222,15 +229,15 @@ function update() {
     player.input.y = player.dude.y
 
 
-    if (player.isInputChanged()){
+    //if (player.isInputChanged()){
         eurecaServer.handleKeys(player.input)
-        console.log("request server to handleKeys from ", myId)
-    }
+        // console.log("request server to handleKeys from ", myId)
+    //}
 
     for (var i in playersList){
         if (!playersList[i])
             continue
-        console.log("updating ", i)
+        // console.log("updating ", i)
         playersList[i].update()
     }
 
